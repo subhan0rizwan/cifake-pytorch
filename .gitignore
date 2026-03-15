@@ -139,6 +139,7 @@ celerybeat.pid
 .envrc
 .venv
 env/
+myenv/
 venv/
 ENV/
 env.bak/
@@ -153,6 +154,13 @@ venv.bak/
 
 # mkdocs documentation
 /site
+
+# data set
+data/
+datasets/
+data-folder/
+*.csv
+*.zip
 
 # mypy
 .mypy_cache/
