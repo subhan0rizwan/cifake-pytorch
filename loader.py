@@ -8,8 +8,22 @@ path = input("Enter image path: ").strip().replace('"', '')
 img = Image.open(path).convert("RGB")
 
 transformIMG = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(256),
+    transforms.RandomResizedCrop(IMG_SIZE, scale = (0.6, 1.0)),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(15),
+    transforms.ColorJitter(
+        brightness=0.3,
+        contrast=0.3,
+        saturation=0.3,
+        hue=0.1
+    ),
+    transforms.RandomAdjustSharpness(2, p=0.3),
+
+    transforms.RandomPerspective(distortion_scale=0.2, p=0.3),
+
+    transforms.RandomApply([
+        transforms.GaussianBlur(kernel_size=3)
+    ], p=0.3),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406],
                          std=[0.229, 0.224, 0.225] )
@@ -26,18 +40,19 @@ class MyModel(nn.Module):
     self.conv3 = nn.Conv2d(32, 64, 3, padding=1)
 
     self.pool = nn.MaxPool2d(2, 2)
-
     self.gap = nn.AdaptiveAvgPool2d((1, 1))
     self.fc = nn.Linear(64, 2)
+    self.dropout = nn.Dropout(0.5)
 
   def forward(self, X):
 
-      X = self.pool(F.relu(self.conv1(X)))
-      X = self.pool(F.relu(self.conv2(X)))
-      X = self.pool(F.relu(self.conv3(X)))
+      X = self.pool(F.relu(self.conv1(X)))  # 256 → 128
+      X = self.pool(F.relu(self.conv2(X)))  # 128 → 64
+      X = self.pool(F.relu(self.conv3(X)))  # 64 → 32
 
-      X = self.gap(X)                     
-      X = torch.flatten(X, 1)
+      X = self.gap(X)                      # → (B, 64, 1, 1)
+      X = torch.flatten(X, 1)              # → (B, 64)
+
       X = self.fc(X)
 
       return X
