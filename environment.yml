@@ -9,6 +9,7 @@ dependencies:
       - torchvision==0.25.0
       - numpy
       - pandas
+      - streamlit == 1.56.0
       - matplotlib==3.8.4
       - scikit-learn==1.4.2
       - scipy==1.11.4
